@@ -1,9 +1,7 @@
 (function() {
-  var SELECTOR, addEventListener, clickEvent, numberRegExp, sortable, touchDevice, trimRegExp;
+  var SELECTOR, addEventListener, clickEvent, sortable, touchDevice, trimRegExp;
 
   SELECTOR = 'table[data-sortable]';
-
-  numberRegExp = /^-?[£$¤]?[\d,.]+%?$/;
 
   trimRegExp = /^\s+|\s+$/g;
 
@@ -95,17 +93,16 @@
       });
     },
     getColumnType: function(table, i) {
-      var row, text, _i, _len, _ref;
+      var row, text, type, _i, _j, _len, _len1, _ref, _ref1;
       _ref = table.tBodies[0].rows;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         row = _ref[_i];
         text = sortable.getNodeValue(row.cells[i]);
-        if (text !== '') {
-          if (text.match(numberRegExp)) {
-            return sortable.types.numeric;
-          }
-          if (!isNaN(Date.parse(text))) {
-            return sortable.types.date;
+        _ref1 = this.types;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          type = _ref1[_j];
+          if (type.isOfType(text)) {
+            return type;
           }
         }
       }
@@ -123,8 +120,14 @@
       }
       return node.textContent.replace(trimRegExp, '');
     },
-    types: {
-      numeric: {
+    types: [
+      {
+        name: 'numeric',
+        isOfType: function(a) {
+          var numberRegExp;
+          numberRegExp = /^-?[£$¤]?[\d,.]+%?$/;
+          return a.match(numberRegExp);
+        },
         defaultSortDirection: 'descending',
         compare: function(a, b) {
           var aa, bb;
@@ -138,14 +141,11 @@
           }
           return bb - aa;
         }
-      },
-      alpha: {
-        defaultSortDirection: 'ascending',
-        compare: function(a, b) {
-          return a[0].localeCompare(b[0]);
-        }
-      },
-      date: {
+      }, {
+        name: 'date',
+        isOfType: function(a) {
+          return !isNaN(Date.parse(a));
+        },
         defaultSortDirection: 'ascending',
         compare: function(a, b) {
           var aa, bb;
@@ -159,8 +159,17 @@
           }
           return aa - bb;
         }
+      }, {
+        name: 'alpha',
+        isOfType: function(a) {
+          return true;
+        },
+        defaultSortDirection: 'ascending',
+        compare: function(a, b) {
+          return a[0].localeCompare(b[0]);
+        }
       }
-    }
+    ]
   };
 
   setTimeout(sortable.init, 0);

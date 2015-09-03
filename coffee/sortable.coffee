@@ -1,6 +1,5 @@
 SELECTOR = 'table[data-sortable]'
 
-numberRegExp = /^-?[£$¤]?[\d,.]+%?$/
 trimRegExp = /^\s+|\s+$/g
 
 touchDevice = 'ontouchstart' of document.documentElement
@@ -69,12 +68,16 @@ sortable =
 
   getColumnType: (table, i) ->
     for row in table.tBodies[0].rows
-      text = sortable.getNodeValue row.cells[i]
-      if text isnt ''
-        if text.match(numberRegExp)
-          return sortable.types.numeric
-        if not isNaN Date.parse(text)
-          return sortable.types.date
+      text = sortable.getNodeValue row.cells[i] # getNodeValue ?
+      for type in @types
+        return type if type.isOfType text
+
+      # if text isnt ''
+      #   # sortable.types
+      #   if text.match(numberRegExp)
+      #     return sortable.types.numeric
+      #   if not isNaN Date.parse(text)
+      #     return sortable.types.date
 
     return sortable.types.alpha
 
@@ -84,8 +87,11 @@ sortable =
     return node.innerText.replace(trimRegExp, '') unless typeof node.innerText is 'undefined'
     node.textContent.replace trimRegExp, ''
 
-  types:
-    numeric:
+  types: [
+      name: 'numeric'
+      isOfType: (a) ->
+        numberRegExp = /^-?[£$¤]?[\d,.]+%?$/
+        a.match numberRegExp
       defaultSortDirection: 'descending'
       compare: (a, b) ->
         aa = parseFloat(a[0].replace(/[^0-9.-]/g, ''), 10)
@@ -93,13 +99,10 @@ sortable =
         aa = 0 if isNaN(aa)
         bb = 0 if isNaN(bb)
         bb - aa
-
-    alpha:
-      defaultSortDirection: 'ascending'
-      compare: (a, b) ->
-        a[0].localeCompare b[0]
-
-    date:
+    ,
+      name: 'date'
+      isOfType: (a) ->
+        not isNaN Date.parse(a)
       defaultSortDirection: 'ascending'
       compare: (a, b) ->
         aa = Date.parse(a[0])
@@ -107,6 +110,15 @@ sortable =
         aa = 0 if isNaN(aa)
         bb = 0 if isNaN(bb)
         aa - bb
+    ,
+      name: 'alpha'
+      isOfType: (a) -> true # default
+      defaultSortDirection: 'ascending'
+      compare: (a, b) ->
+        a[0].localeCompare b[0]
+  ]
+
+
 
 setTimeout sortable.init, 0
 
