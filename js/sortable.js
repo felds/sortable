@@ -55,6 +55,10 @@
     setupClickableTH: function(table, th, i) {
       var type;
       type = sortable.getColumnType(table, i);
+      if (type == null) {
+        th.setAttribute('data-sortable', false);
+        return;
+      }
       return addEventListener(th, clickEvent, function(e) {
         var newSortedDirection, row, rowArray, rowArrayObject, sorted, sortedDirection, tBody, ths, _i, _j, _k, _len, _len1, _len2, _ref, _results;
         sorted = this.getAttribute('data-sorted') === 'true';
@@ -106,7 +110,6 @@
           }
         }
       }
-      return sortable.types.alpha;
     },
     getNodeValue: function(node) {
       if (!node) {

@@ -35,6 +35,10 @@ sortable =
   setupClickableTH: (table, th, i) ->
     type = sortable.getColumnType table, i
 
+    unless type?
+      th.setAttribute 'data-sortable', false
+      return
+
     addEventListener th, clickEvent, (e) ->
       sorted = @getAttribute('data-sorted') is 'true'
       sortedDirection = @getAttribute 'data-sorted-direction'
@@ -71,15 +75,6 @@ sortable =
       text = sortable.getNodeValue row.cells[i] # getNodeValue ?
       for type in @types
         return type if type.isOfType text
-
-      # if text isnt ''
-      #   # sortable.types
-      #   if text.match(numberRegExp)
-      #     return sortable.types.numeric
-      #   if not isNaN Date.parse(text)
-      #     return sortable.types.date
-
-    return sortable.types.alpha
 
   getNodeValue: (node) ->
     return '' unless node
