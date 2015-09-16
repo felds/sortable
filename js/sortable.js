@@ -54,8 +54,14 @@
     },
     setupClickableTH: function(table, th, i) {
       var type;
-      type = sortable.getColumnType(table, i);
-      if (type == null) {
+      if (th.getAttribute('data-sort-type')) {
+        type = this.getType(th.getAttribute('data-sort-type'));
+      } else {
+        type = sortable.getColumnType(table, i);
+      }
+      if (type != null) {
+        th.setAttribute('data-sort-type', type.name);
+      } else {
         th.setAttribute('data-sortable', false);
         return;
       }

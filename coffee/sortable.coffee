@@ -33,9 +33,17 @@ sortable =
     table
 
   setupClickableTH: (table, th, i) ->
-    type = sortable.getColumnType table, i
+    if th.getAttribute('data-sort-type')
+      type = @getType(th.getAttribute('data-sort-type'))
+    else
+      type = sortable.getColumnType table, i
 
-    unless type?
+    if type?
+      # add the data-sort-attribute so the user can easily stylize the <th> and
+      # also inspect the type being used (useful when debugging)
+      th.setAttribute 'data-sort-type', type.name
+    else
+      # if it fails to identify the type to be used, add a data-sortable=false
       th.setAttribute 'data-sortable', false
       return
 
