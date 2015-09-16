@@ -116,9 +116,9 @@ sortable =
 
   types: [
       name: 'numeric'
+      regexp: /^-?[£$¤]?[\d,.]+%?$/
       isOfType: (a) ->
-        numberRegExp = /^-?[£$¤]?[\d,.]+%?$/
-        a.match numberRegExp
+        @regexp.test a
       defaultSortDirection: 'descending'
       compare: (a, b) ->
         aa = parseFloat(a[0].replace(/[^0-9.-]/g, ''), 10)
@@ -127,9 +127,32 @@ sortable =
         bb = 0 if isNaN(bb)
         bb - aa
     ,
-      name: 'date'
+      name: 'semver'
+      regexp: /\d+\.\d+\.\d+/
       isOfType: (a) ->
-        not isNaN Date.parse(a)
+        @regexp.test a
+      defaultSortDirection: 'descending'
+      compare: (a, b) ->
+        # algorithm copied from
+        # https://github.com/substack/semver-compare
+        pa = a[0].split('.')
+        pb = b[0].split('.')
+        for na, k in pa
+          na = Number(pa[k])
+          nb = Number(pb[k])
+          if na > nb then return 1
+          if nb > na then return -1
+          if !isNaN(na) && isNaN(nb) then return 1
+          if isNaN(na) && !isNaN(nb) then return -1
+        0
+    ,
+      name: 'date'
+      regexp: null
+      isOfType: (a) ->
+        if @regexp?
+          @regexp.test a
+        else
+          not isNaN Date.parse(a)
       defaultSortDirection: 'ascending'
       compare: (a, b) ->
         aa = Date.parse(a[0])
@@ -139,6 +162,7 @@ sortable =
         aa - bb
     ,
       name: 'alpha'
+      regexp: null
       isOfType: (a) -> true # default
       defaultSortDirection: 'ascending'
       compare: (a, b) ->

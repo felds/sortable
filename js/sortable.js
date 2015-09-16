@@ -161,10 +161,9 @@
     types: [
       {
         name: 'numeric',
+        regexp: /^-?[£$¤]?[\d,.]+%?$/,
         isOfType: function(a) {
-          var numberRegExp;
-          numberRegExp = /^-?[£$¤]?[\d,.]+%?$/;
-          return a.match(numberRegExp);
+          return this.regexp.test(a);
         },
         defaultSortDirection: 'descending',
         compare: function(a, b) {
@@ -180,9 +179,44 @@
           return bb - aa;
         }
       }, {
-        name: 'date',
+        name: 'semver',
+        regexp: /\d+\.\d+\.\d+/,
         isOfType: function(a) {
-          return !isNaN(Date.parse(a));
+          return this.regexp.test(a);
+        },
+        defaultSortDirection: 'descending',
+        compare: function(a, b) {
+          var k, na, nb, pa, pb, _i, _len;
+          pa = a[0].split('.');
+          pb = b[0].split('.');
+          for (k = _i = 0, _len = pa.length; _i < _len; k = ++_i) {
+            na = pa[k];
+            na = Number(pa[k]);
+            nb = Number(pb[k]);
+            if (na > nb) {
+              return 1;
+            }
+            if (nb > na) {
+              return -1;
+            }
+            if (!isNaN(na) && isNaN(nb)) {
+              return 1;
+            }
+            if (isNaN(na) && !isNaN(nb)) {
+              return -1;
+            }
+          }
+          return 0;
+        }
+      }, {
+        name: 'date',
+        regexp: null,
+        isOfType: function(a) {
+          if (this.regexp != null) {
+            return this.regexp.test(a);
+          } else {
+            return !isNaN(Date.parse(a));
+          }
         },
         defaultSortDirection: 'ascending',
         compare: function(a, b) {
@@ -199,6 +233,7 @@
         }
       }, {
         name: 'alpha',
+        regexp: null,
         isOfType: function(a) {
           return true;
         },
