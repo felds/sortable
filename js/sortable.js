@@ -123,6 +123,35 @@
       }
       return node.textContent.replace(trimRegExp, '');
     },
+    getType: function(name) {
+      var matches;
+      matches = this.types.filter(function(x) {
+        return x.name === name;
+      });
+      if (matches.length) {
+        return matches[0];
+      }
+    },
+    getTypeIndex: function(name) {
+      var k, v, _i, _len, _ref;
+      _ref = this.types;
+      for (k = _i = 0, _len = _ref.length; _i < _len; k = ++_i) {
+        v = _ref[k];
+        if (v.name === name) {
+          return k;
+        }
+      }
+    },
+    insertTypeAfter: function(name, type) {
+      var typeIndex;
+      typeIndex = this.getTypeIndex(name);
+      return this.types.splice(typeIndex + 1, 0, type);
+    },
+    insertTypeBefore: function(name, type) {
+      var typeIndex;
+      typeIndex = this.getTypeIndex(name);
+      return this.types.splice(typeIndex, 0, type);
+    },
     types: [
       {
         name: 'numeric',

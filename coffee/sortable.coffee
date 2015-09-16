@@ -72,15 +72,39 @@ sortable =
 
   getColumnType: (table, i) ->
     for row in table.tBodies[0].rows
-      text = sortable.getNodeValue row.cells[i] # getNodeValue ?
+      text = sortable.getNodeValue row.cells[i]
       for type in @types
         return type if type.isOfType text
 
   getNodeValue: (node) ->
-    return '' unless node
+    return '' if not node
     return node.getAttribute('data-value') if node.getAttribute('data-value') isnt null
-    return node.innerText.replace(trimRegExp, '') unless typeof node.innerText is 'undefined'
+    return node.innerText.replace(trimRegExp, '') if typeof node.innerText isnt 'undefined'
     node.textContent.replace trimRegExp, ''
+
+  getType: (name) ->
+    # not relying on Array.prototype.find since it was introduced in ES6 and
+    # have bad browser support at this time
+    # (consider changing it in the future)
+    # @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find#Browser_compatibility
+    matches = @types.filter (x) -> x.name is name
+    matches[0] if matches.length
+
+  getTypeIndex: (name) ->
+    # not relying on Array.prototype.findIndex since it was introduced in ES6 and
+    # have bad browser support at this time
+    # (consider changing it in the future)
+    # @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex#Browser_compatibility
+    for v, k in @types
+      return k if v.name is name
+
+  insertTypeAfter: (name, type) ->
+    typeIndex = @getTypeIndex name
+    @types.splice typeIndex + 1, 0, type
+
+  insertTypeBefore: (name, type) ->
+    typeIndex = @getTypeIndex name
+    @types.splice typeIndex, 0, type
 
   types: [
       name: 'numeric'
